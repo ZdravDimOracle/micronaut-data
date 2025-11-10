@@ -21,10 +21,7 @@ import io.micronaut.core.beans.BeanIntrospection;
 import io.micronaut.core.beans.BeanProperty;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
-import io.micronaut.data.annotation.Id;
-import io.micronaut.data.annotation.Relation;
-import io.micronaut.data.annotation.Transient;
-import io.micronaut.data.annotation.Version;
+import io.micronaut.data.annotation.*;
 import io.micronaut.data.exceptions.MappingException;
 import io.micronaut.data.model.*;
 import io.micronaut.data.model.runtime.convert.AttributeConverter;
@@ -422,4 +419,20 @@ public class RuntimePersistentEntity<T> extends AbstractPersistentEntity impleme
         return this.hasAutoPopulatedProperties;
     }
 
+    @Override
+    public Optional<PersistentEntity> getJsonViewEntity() {
+        return getAnnotationMetadata().classValue(JsonView.class, "entity").map(this::getEntity);
+    }
+
+    @Override
+    public Optional<PersistentEntity> getJsonSubViewEntity() {
+        return getAnnotationMetadata().classValue(JsonSubView.class, "entity").map(this::getEntity);
+    }
+
+    @Override
+    public JsonView.Operation[] getViewSupportedOperations() {
+        JsonView.Operation[] operations = getAnnotationMetadata().enumValues(JsonView.class, "operations", JsonView.Operation.class);
+        if (operations.length == 0) return JsonView.Operation.values();
+        return operations;
+    }
 }
